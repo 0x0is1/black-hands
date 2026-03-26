@@ -2,7 +2,7 @@
   "expo": {
     "name": "Gems of Congress",
     "slug": "gems-of-congress",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "icon": "./assets/icon.png",
