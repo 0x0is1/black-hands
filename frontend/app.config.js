@@ -23,6 +23,7 @@ module.exports = {
         userInterfaceStyle: "automatic",
         icon: "./assets/icon.png",
         scheme: "gemsofcongress",
+        owner: "0x0is1",
         splash: {
             image: "./assets/splash-icon.png",
             resizeMode: "contain",

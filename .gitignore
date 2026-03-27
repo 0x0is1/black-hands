@@ -43,5 +43,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-*.json
-*.txt
+apps.json
+fb.json
+new_app.json
+secret.txt
+web_app.json
