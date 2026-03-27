@@ -65,8 +65,8 @@ process.on('unhandledRejection', (reason) => {
     process.exit(1);
 });
 
-app.listen(env.PORT, () => {
-    logger.info(`Gems of Congress API running on port ${env.PORT}`, { env: env.NODE_ENV });
+app.listen(env.PORT, '0.0.0.0', () => {
+    logger.info(`Gems of Congress API running on port ${env.PORT} on all interfaces (0.0.0.0)`, { env: env.NODE_ENV });
 });
 
 export default app;

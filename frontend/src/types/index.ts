@@ -7,7 +7,9 @@ export interface Post {
     authorId: string;
     authorName: string;
     authorAvatar: string;
-    waybackUrl: string;
+    snapshotScreenshot?: string;
+    snapshotTimestamp?: string;
+    waybackUrl?: string;
     upvotes: number;
     downvotes: number;
     createdAt: string;

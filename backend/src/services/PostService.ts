@@ -2,7 +2,7 @@ import { db } from '@config/firebase';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { Post, AppError } from '@appTypes/index';
 import { CreatePostInput } from '@utils/validators';
-import { WaybackService } from '@services/WaybackService';
+import { SnapshotService } from '@services/SnapshotService';
 
 function makeError(message: string, statusCode: number, code: string): AppError {
     const err = new Error(message) as AppError;
@@ -32,23 +32,25 @@ export class PostService {
         }
 
         const snapshot = await query.get();
-        const all = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Post));
-        const hasMore = all.length > limit;
-        const posts = hasMore ? all.slice(0, limit) : all;
-        const nextCursor = hasMore ? posts[posts.length - 1].id : null;
+        const posts = await Promise.all(
+            snapshot.docs.slice(0, limit).map(doc => PostService.serializePost(doc))
+        );
+
+        const hasMore = snapshot.docs.length > limit;
+        const nextCursor = hasMore ? snapshot.docs[limit - 1].id : null;
 
         return { posts, cursor: nextCursor, hasMore };
     }
 
-    static async getPost(id: string): Promise<Post> {
-        const doc = await db.collection('posts').doc(id).get();
-        if (!doc.exists) throw makeError('Post not found', 404, 'NOT_FOUND');
-        return { id: doc.id, ...doc.data() } as Post;
-    }
-
-    static async createPost(data: CreatePostInput, userId: string, authorName: string, authorAvatar: string): Promise<Post> {
+    static async createPost(
+        data: CreatePostInput,
+        userId: string,
+        authorName: string,
+        authorAvatar: string
+    ): Promise<Post> {
         const ref = db.collection('posts').doc();
         const now = FieldValue.serverTimestamp();
+
         const postData = {
             tweetUrl: data.tweetUrl,
             title: data.title,
@@ -56,7 +58,8 @@ export class PostService {
             authorId: userId,
             authorName,
             authorAvatar,
-            waybackUrl: null,
+            snapshotScreenshot: null,
+            snapshotTimestamp: null,
             upvotes: 0,
             downvotes: 0,
             createdAt: now,
@@ -65,16 +68,45 @@ export class PostService {
 
         await ref.set(postData);
 
-        WaybackService.createSnapshot(data.tweetUrl)
-            .then((url) => (url ? PostService.updatePostWayback(ref.id, url) : Promise.resolve()))
-            .catch(() => undefined);
+        // 🔥 BACKGROUND SNAPSHOT (non-blocking)
+        setImmediate(async () => {
+            try {
+                const snapshot = await SnapshotService.createSnapshotWithRetry(data.tweetUrl);
+
+                if (snapshot) {
+                    await PostService.updatePostSnapshot(ref.id, snapshot);
+                }
+            } catch (err) {
+                console.error('Background snapshot failed:', err);
+            }
+        });
 
         const created = await ref.get();
-        return { id: ref.id, ...created.data() } as Post;
+        return PostService.serializePost(created);
     }
 
-    static async updatePostWayback(id: string, waybackUrl: string): Promise<void> {
-        await db.collection('posts').doc(id).set({ waybackUrl }, { merge: true });
+    static async updatePostSnapshot(
+        id: string,
+        snapshot: {
+            screenshotBase64: string;
+            htmlContent: string;
+            timestamp: string;
+        }
+    ): Promise<void> {
+        await db.collection('posts').doc(id).set(
+            {
+                snapshotScreenshot: snapshot.screenshotBase64,
+                snapshotTimestamp: snapshot.timestamp,
+                updatedAt: FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+        );
+    }
+
+    static async getPost(id: string): Promise<Post> {
+        const doc = await db.collection('posts').doc(id).get();
+        if (!doc.exists) throw makeError('Post not found', 404, 'NOT_FOUND');
+        return PostService.serializePost(doc);
     }
 
     static async deletePost(id: string, requestingUserId: string): Promise<void> {
@@ -100,11 +132,31 @@ export class PostService {
         }
 
         const snapshot = await query.get();
-        const all = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Post));
-        const hasMore = all.length > limit;
-        const posts = hasMore ? all.slice(0, limit) : all;
-        const nextCursor = hasMore ? posts[posts.length - 1].id : null;
+        const posts = await Promise.all(
+            snapshot.docs.slice(0, limit).map(doc => PostService.serializePost(doc))
+        );
+
+        const hasMore = snapshot.docs.length > limit;
+        const nextCursor = hasMore ? snapshot.docs[limit - 1].id : null;
 
         return { posts, cursor: nextCursor, hasMore };
+    }
+
+    static async serializePost(doc: FirebaseFirestore.DocumentSnapshot): Promise<Post> {
+        const data = doc.data()!;
+
+        return {
+            id: doc.id,
+            ...data,
+            tweetEmbedHtml: `<blockquote class="twitter-tweet"><a href="${data.tweetUrl}"></a></blockquote>`,
+            createdAt:
+                data.createdAt instanceof Timestamp
+                    ? data.createdAt.toDate().toISOString()
+                    : new Date().toISOString(),
+            updatedAt:
+                data.updatedAt instanceof Timestamp
+                    ? data.updatedAt.toDate().toISOString()
+                    : new Date().toISOString(),
+        } as unknown as Post;
     }
 }

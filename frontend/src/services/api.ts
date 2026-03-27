@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 import { auth } from '@services/firebase';
 import { Post, Vote, UserProfile, PaginatedResponse, ApiResponse } from '@appTypes/index';
 
-const API_BASE = Platform.OS === 'android' ? 'http://10.0.2.2:3000/api' : 'http://localhost:3000/api';
+const API_BASE = process.env.EXPO_PUBLIC_API_URL || (Platform.OS === 'android' ? 'http://10.0.2.2:3000/api' : 'http://localhost:3000/api');
 
 async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const token = await auth.currentUser?.getIdToken(true);

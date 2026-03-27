@@ -18,6 +18,9 @@ import * as Notifications from 'expo-notifications';
 import { ThemeProvider, useTheme } from '@contexts/ThemeContext';
 import { AuthProvider } from '@contexts/AuthContext';
 import { ToastProvider } from '@contexts/ToastContext';
+import { registerBackgroundFetchAsync } from '@tasks/backgroundCheck';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getFeed } from '@services/api';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -49,6 +52,22 @@ function RootLayoutInner() {
 
     useEffect(() => {
         Notifications.requestPermissionsAsync();
+        registerBackgroundFetchAsync();
+    }, []);
+
+    // Sync last seen post ID whenever app becomes active or on mount
+    useEffect(() => {
+        const syncLastSeen = async () => {
+            try {
+                const { posts } = await getFeed();
+                if (posts.length > 0) {
+                    await AsyncStorage.setItem('last_seen_post_id', posts[0].id);
+                }
+            } catch (err) {
+                console.log('Failed to sync last seen post:', err);
+            }
+        };
+        syncLastSeen();
     }, []);
 
     if (!fontsLoaded) return null;

@@ -12,6 +12,11 @@ export const lightTokens = {
         danger: '#E63946',
         tabBar: '#FFFFFF',
         tabBarBorder: '#E0E0E0',
+        brand: '#E63946',
+    },
+    layout: {
+        screenPaddingBottom: 40,
+        headerHeight: 60,
     },
     spacing: {
         xs: 4,
@@ -73,6 +78,11 @@ export const darkTokens = {
         danger: '#E63946',
         tabBar: '#141414',
         tabBarBorder: '#2A2A2A',
+        brand: '#E63946',
+    },
+    layout: {
+        screenPaddingBottom: 40,
+        headerHeight: 60,
     },
     spacing: {
         xs: 4,

@@ -22,3 +22,13 @@ export const getVote = asyncHandler(async (req: AuthenticatedRequest, res: Respo
     const response: ApiResponse<Vote | null> = { success: true, data: vote };
     res.json(response);
 });
+export const removeVote = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const postId = req.params.postId as string;
+    await VoteService.removeVote(req.user!.uid, postId);
+    const post = await PostService.getPost(postId);
+    const response: ApiResponse<{ upvotes: number; downvotes: number }> = {
+        success: true,
+        data: { upvotes: post.upvotes, downvotes: post.downvotes },
+    };
+    res.json(response);
+});

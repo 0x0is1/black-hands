@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getSnapshot } from '@controllers/waybackController';
+import { getSnapshot } from '@controllers/snapshotController';
 import { requireAuth } from '@middleware/auth';
 import { validate } from '@middleware/validate';
 import { postCreateLimiter } from '@middleware/rateLimiter';

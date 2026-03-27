@@ -1,0 +1,102 @@
+import React from 'react';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '@contexts/ThemeContext';
+import { DSText } from '@ds/Text';
+
+interface NavBarProps {
+    title?: string;
+    showBack?: boolean;
+    rightElement?: React.ReactNode;
+}
+
+export function NavBar({ title, showBack, rightElement }: NavBarProps) {
+    const { tokens } = useTheme();
+    const insets = useSafeAreaInsets();
+
+    return (
+        <View style={[
+            styles.container,
+            {
+                backgroundColor: tokens.colors.surface,
+                borderBottomColor: tokens.colors.border,
+                paddingTop: insets.top,
+                height: tokens.layout.headerHeight + insets.top,
+            }
+        ]}>
+            <View style={styles.content}>
+                <View style={styles.left}>
+                    {showBack ? (
+                        <TouchableOpacity
+                            onPress={() => router.back()}
+                            style={styles.iconBtn}
+                            accessibilityLabel="Go back"
+                        >
+                            <Ionicons name="arrow-back" size={24} color={tokens.colors.textPrimary} />
+                        </TouchableOpacity>
+                    ) : (
+                        <View style={styles.brandRow}>
+                            <Ionicons name="diamond" size={24} color={tokens.colors.brand} />
+                        </View>
+                    )}
+                </View>
+
+                <View style={styles.center}>
+                    <DSText
+                        size={title ? "md" : "lg"}
+                        weight="extraBold"
+                        color="textPrimary"
+                        style={styles.titleText}
+                    >
+                        {title || "Gems of Congress"}
+                    </DSText>
+                </View>
+
+                <View style={styles.right}>
+                    {rightElement}
+                </View>
+            </View>
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        width: '100%',
+        borderBottomWidth: 1,
+        justifyContent: 'flex-end',
+    },
+    content: {
+        height: 60,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+    },
+    left: {
+        width: 40,
+        justifyContent: 'center',
+    },
+    center: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    right: {
+        width: 40,
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+    },
+    brandRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    titleText: {
+        letterSpacing: -0.5,
+    },
+    iconBtn: {
+        padding: 4,
+        marginLeft: -4,
+    }
+});

@@ -1,5 +1,10 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet, ViewStyle, ActivityIndicator } from 'react-native';
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    withSpring,
+} from 'react-native-reanimated';
 import { useTheme } from '@contexts/ThemeContext';
 import { DSText } from '@ds/Text';
 
@@ -25,6 +30,7 @@ export function DSButton({
     accessibilityLabel,
 }: DSButtonProps) {
     const { tokens } = useTheme();
+    const scale = useSharedValue(1);
 
     const containerStyle: ViewStyle = {
         backgroundColor:
@@ -41,6 +47,10 @@ export function DSButton({
         opacity: disabled ? 0.5 : 1,
     };
 
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: scale.value }],
+    }));
+
     const textColor =
         variant === 'solid' ? 'accentForeground'
             : variant === 'ghost' ? 'danger'
@@ -48,20 +58,34 @@ export function DSButton({
 
     return (
         <TouchableOpacity
+            activeOpacity={0.8}
             onPress={onPress}
+            onPressIn={() => (scale.value = withSpring(0.96))}
+            onPressOut={() => (scale.value = withSpring(1))}
             style={containerStyle}
             disabled={disabled || loading}
             accessibilityLabel={accessibilityLabel ?? label}
             accessibilityRole="button"
         >
-            {loading ? (
-                <ActivityIndicator color={variant === 'solid' ? tokens.colors.accentForeground : tokens.colors.textPrimary} />
-            ) : (
-                <DSText weight="semiBold" size="base" color={textColor}>{label}</DSText>
-            )}
+            <Animated.View style={[styles.inner, animatedStyle]}>
+                {loading ? (
+                    <ActivityIndicator color={variant === 'solid' ? tokens.colors.accentForeground : tokens.colors.textPrimary} />
+                ) : (
+                    <DSText weight="semiBold" size="base" color={textColor}>{label}</DSText>
+                )}
+            </Animated.View>
         </TouchableOpacity>
     );
 }
+
+const styles = StyleSheet.create({
+    inner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+    },
+});
 
 export default DSButton;
 

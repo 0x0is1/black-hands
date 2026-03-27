@@ -1,93 +1,133 @@
 import React from 'react';
-import { TouchableOpacity, View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import Animated, {
+  FadeInDown,
+  Layout
+} from 'react-native-reanimated';
 import { useTheme } from '@contexts/ThemeContext';
 import { DSText } from '@ds/Text';
-import { DSAvatar } from '@ds/Avatar';
 import { VoteButtons } from '@components/feed/VoteButtons';
 import { WaybackButton } from '@components/feed/WaybackButton';
+import { TweetEmbed } from '@components/feed/TweetEmbed';
 import { useRelativeTime } from '@hooks/useRelativeTime';
+import { useAuthContext } from '@contexts/AuthContext';
 import { Post } from '@appTypes/index';
-import { AVATAR_SIZE_SM, TWEET_EMBED_HEIGHT_FEED } from '@utils/constants';
 
 interface FeedCardProps {
-    post: Post;
+  post: Post;
 }
 
 export function FeedCard({ post }: FeedCardProps) {
-    const { tokens } = useTheme();
-    const relativeTime = useRelativeTime(post.createdAt);
+  const { tokens } = useTheme();
+  const { user } = useAuthContext();
+  const relativeTime = useRelativeTime(post.createdAt);
 
-    const cardStyle = {
-        backgroundColor: tokens.colors.surface,
-        borderBottomWidth: 1,
-        borderBottomColor: tokens.colors.border,
-        paddingHorizontal: tokens.spacing.lg,
-        paddingVertical: tokens.spacing.md,
-    };
+  const handleUserPress = () => {
+    if (post.authorId === user?.uid) {
+      router.push('/profile');
+    } else {
+      router.push(`/user/${post.authorId}`);
+    }
+  };
 
-    const tweetPlaceholderStyle = {
-        height: TWEET_EMBED_HEIGHT_FEED,
-        backgroundColor: tokens.colors.surface2,
-        borderRadius: tokens.radius.sm,
-        alignItems: 'center' as const,
-        justifyContent: 'center' as const,
-        gap: 4,
-    };
+  const cardStyle = {
+    backgroundColor: tokens.colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: tokens.colors.border,
+    paddingHorizontal: tokens.spacing.lg,
+    paddingVertical: tokens.spacing.md,
+  };
 
-    return (
+  return (
+    <Animated.View
+      entering={FadeInDown.duration(400).springify().damping(12)}
+      layout={Layout.springify()}
+      style={cardStyle}
+    >
+      <View style={styles.inner}>
+
         <TouchableOpacity
-            onPress={() => router.push(`/post/${post.id}`)}
-            accessibilityLabel={`Open post: ${post.title}`}
-            accessibilityRole="button"
+          activeOpacity={0.7}
+          onPress={() => router.push(`/post/${post.id}`)}
         >
-            <View style={cardStyle}>
-                <View style={styles.inner}>
-                    <DSText size="md" weight="bold" color="textPrimary" numberOfLines={2}>{post.title}</DSText>
-                    <View style={tweetPlaceholderStyle}>
-                        <Ionicons name="logo-twitter" size={24} color={tokens.colors.accent} />
-                        <DSText size="xs" color="textMuted">Embedded Tweet</DSText>
-                    </View>
-                    <DSText size="base" color="textMuted" numberOfLines={3} ellipsizeMode="tail">{post.description}</DSText>
-                    <View style={styles.actionRow}>
-                        <View style={styles.metaRow}>
-                            <DSAvatar size={AVATAR_SIZE_SM} uri={post.authorAvatar} name={post.authorName} />
-                            <DSText size="sm" color="textMuted">{post.authorName}</DSText>
-                            <DSText size="sm" color="textMuted">·</DSText>
-                            <DSText size="sm" color="textMuted">{relativeTime}</DSText>
-                        </View>
-                        <View style={styles.actions}>
-                            <VoteButtons postId={post.id} upvotes={post.upvotes} downvotes={post.downvotes} iconSize={16} />
-                            <WaybackButton waybackUrl={post.waybackUrl} />
-                        </View>
-                    </View>
-                </View>
-            </View>
+          <View style={styles.headerRow}>
+            <DSText size="md" weight="bold" color="textPrimary" style={{ flex: 1 }} numberOfLines={1}>
+              {post.title}
+            </DSText>
+            <DSText size="xs" color="textMuted">
+              {relativeTime}
+            </DSText>
+          </View>
+
+          <DSText
+            size="base"
+            color="textMuted"
+            numberOfLines={3}
+            ellipsizeMode="tail"
+            style={{ marginBottom: tokens.spacing.sm }}
+          >
+            {post.description}
+          </DSText>
+
+          <TweetEmbed tweetUrl={post.tweetUrl} html={post.tweetEmbedHtml} interactive={false} />
         </TouchableOpacity>
-    );
+
+        <View style={styles.actionRow}>
+          <TouchableOpacity
+            style={styles.metaRow}
+            activeOpacity={0.6}
+            onPress={handleUserPress}
+          >
+            <DSText size="sm" weight="semiBold" color="textMuted">
+              @{post.authorName}
+            </DSText>
+          </TouchableOpacity>
+
+          <View style={styles.actions}>
+            <VoteButtons
+              postId={post.id}
+              upvotes={post.upvotes}
+              downvotes={post.downvotes}
+              iconSize={16}
+            />
+            <WaybackButton
+              waybackUrl={post.waybackUrl}
+              snapshotScreenshot={post.snapshotScreenshot}
+            />
+          </View>
+        </View>
+
+      </View>
+    </Animated.View>
+  );
 }
 
 const styles = StyleSheet.create({
-    inner: {
-        gap: 8,
-    },
-    actionRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    metaRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-        flex: 1,
-        flexWrap: 'wrap',
-    },
-    actions: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 16,
-    },
+  inner: {
+    gap: 8,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    flex: 1,
+    flexWrap: 'wrap',
+  },
+  actions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
 });
-

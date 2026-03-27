@@ -11,6 +11,10 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { auth } from '@services/firebase';
 import { AuthError } from '@appTypes/index';
 
+GoogleSignin.configure({
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '',
+});
+
 interface AuthContextValue {
     user: User | null;
     loading: boolean;
@@ -27,9 +31,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        console.log('[AuthContext] Attaching onAuthStateChanged listener');
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+            console.log('[AuthContext] onAuthStateChanged fired. User:', firebaseUser?.uid || 'null');
+            setUser(firebaseUser);
+            setLoading(false);
+
             if (firebaseUser) {
                 try {
+                    console.log('[AuthContext] User is logged in, fetching FCM token & syncing profile...');
                     // Automatically hit the backend to create/sync Postgres/Firestore records
                     const { syncUserProfile } = require('@services/api');
                     const { Platform } = require('react-native');
@@ -45,16 +55,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                             fcmToken = result.data;
                         }
                     } catch (e) {
-                        console.log('Push Token restricted or unconfigured', e);
+                        console.log('[AuthContext] Push Token restricted or unconfigured', e);
                     }
 
+                    console.log('[AuthContext] Calling syncUserProfile...');
                     await syncUserProfile(fcmToken);
+                    console.log('[AuthContext] Profile synced successfully');
                 } catch (err) {
-                    console.error('Failed to sync user profile with backend', err);
+                    console.error('[AuthContext] Failed to sync user profile with backend', err);
                 }
             }
-            setUser(firebaseUser);
-            setLoading(false);
         });
         return unsubscribe;
     }, []);
@@ -71,10 +81,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function signInWithGoogle(): Promise<AuthError | null> {
         try {
+            console.log('[AuthContext] Starting Google Sign-In flow...');
             await GoogleSignin.hasPlayServices();
-            await GoogleSignin.signIn();
+            const response = await GoogleSignin.signIn();
+            const idToken = response.data?.idToken;
+            console.log('[AuthContext] Got Google response, idToken length:', idToken?.length || 0);
+            if (!idToken) throw new Error('No ID token found');
+
+            console.log('[AuthContext] Passing idToken to Firebase auth...');
+            const { GoogleAuthProvider, signInWithCredential } = require('firebase/auth');
+            const credential = GoogleAuthProvider.credential(idToken);
+            await signInWithCredential(auth, credential);
+            console.log('[AuthContext] Successfully authenticated with Firebase!');
             return null;
         } catch (err) {
+            console.error('[AuthContext] Google sign-in caught error:', err);
             const e = err as { code?: string; message?: string };
             return { code: e.code ?? 'auth/google-failed', message: e.message ?? 'Google sign in failed' };
         }

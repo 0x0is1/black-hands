@@ -1,4 +1,6 @@
+/* eslint-disable */
 const fs = require('fs');
+require('dotenv').config();
 
 if (process.env.GOOGLE_SERVICES_JSON) {
     try {
@@ -48,6 +50,8 @@ module.exports = {
                     "color": "#E63946"
                 }
             ],
+            ["expo-background-fetch", {}],
+            ["expo-task-manager", {}],
             "@react-native-google-signin/google-signin"
         ],
         runtimeVersion: {
@@ -58,7 +62,13 @@ module.exports = {
             router: {},
             eas: {
                 projectId: "7bcc063d-09b8-4a12-a726-91c5bb3e97be"
-            }
+            },
+            firebaseApiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+            firebaseAuthDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+            firebaseProjectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+            firebaseStorageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+            firebaseMessagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+            firebaseAppId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID
         },
         updates: {
             url: "https://u.expo.dev/7bcc063d-09b8-4a12-a726-91c5bb3e97be"

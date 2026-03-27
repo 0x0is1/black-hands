@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,12 +12,13 @@ import { DSButton } from '@ds/Button';
 import { TweetUrlInput } from '@components/post/TweetUrlInput';
 import { MarkdownEditor } from '@components/post/MarkdownEditor';
 import { TITLE_MAX_CHARS } from '@utils/constants';
-import { useEffect } from 'react';
+
+
+import { NavBar } from '@components/common/NavBar';
 
 export default function CreatePost() {
     const { tokens } = useTheme();
     const { user } = useAuthContext();
-    const insets = useSafeAreaInsets();
     const { fields, fieldErrors, submitting, setField, submit } = useCreatePost();
     const [previewMode, setPreviewMode] = useState(false);
 
@@ -26,18 +27,6 @@ export default function CreatePost() {
             router.replace('/login');
         }
     }, [user]);
-
-    const appBarStyle = {
-        backgroundColor: tokens.colors.surface,
-        borderBottomWidth: 1,
-        borderBottomColor: tokens.colors.border,
-        paddingHorizontal: tokens.spacing.lg,
-        paddingTop: insets.top + tokens.spacing.sm,
-        paddingBottom: tokens.spacing.md,
-        flexDirection: 'row' as const,
-        alignItems: 'center' as const,
-        gap: tokens.spacing.sm,
-    };
 
     const screenStyle = {
         flex: 1,
@@ -60,18 +49,12 @@ export default function CreatePost() {
 
     return (
         <View style={screenStyle}>
-            <View style={appBarStyle}>
-                <Ionicons
-                    name="arrow-back"
-                    size={22}
-                    color={tokens.colors.textPrimary}
-                    onPress={() => router.back()}
-                    accessibilityLabel="Go back"
-                />
-                <DSText size="md" weight="bold" color="textPrimary">Share a Gem</DSText>
-            </View>
+            <NavBar title="Share a Gem" showBack />
             <ScrollView
-                contentContainerStyle={styles.content}
+                contentContainerStyle={[
+                    styles.content,
+                    { paddingBottom: tokens.layout.screenPaddingBottom }
+                ]}
                 keyboardShouldPersistTaps="handled"
             >
                 <View style={{ gap: tokens.spacing.lg }}>

@@ -1,36 +1,145 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View } from 'react-native';
 import WebView from 'react-native-webview';
 import { useTheme } from '@contexts/ThemeContext';
+import { Ionicons } from '@expo/vector-icons';
+import { DSText } from '@ds/Text';
 
 interface TweetEmbedProps {
-    html: string;
-    height: number;
+  tweetUrl?: string;
+  html?: string;
+  interactive?: boolean;
 }
 
-export function TweetEmbed({ html, height }: TweetEmbedProps) {
-    const { tokens } = useTheme();
+export function TweetEmbed({ tweetUrl, html: rawHtml, interactive = true }: TweetEmbedProps) {
+  const { tokens, colorMode } = useTheme();
+  const [height, setHeight] = useState(120);
 
-    const fullHtml = `<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;padding:8px;background:${tokens.colors.surface2};font-family:sans-serif;}</style></head><body>${html}<script async src="https://platform.twitter.com/widgets.js"></script></body></html>`;
+  const getTweetId = (url?: string) => {
+    if (!url) return null;
+    const match = url.match(/status\/(\d+)/);
+    return match ? match[1] : null;
+  };
 
-    function onShouldStartLoadWithRequest(req: { url: string }): boolean {
-        const url = req.url;
-        if (url === 'about:blank') return true;
-        if (url.includes('twitter.com') || url.includes('x.com')) return true;
-        return false;
-    }
+  const tweetId = getTweetId(tweetUrl);
+  if (!tweetId) return null;
 
-    return (
-        <View style={{ height, backgroundColor: tokens.colors.surface2 }}>
-            <WebView
-                source={{ html: fullHtml }}
-                style={{ backgroundColor: 'transparent', flex: 1 }}
-                scrollEnabled={false}
-                onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
-                javaScriptEnabled
-                domStorageEnabled={false}
+  const theme = colorMode === 'light' ? 'light' : 'dark';
+  const bg = tokens?.colors?.surface2 || '#000';
+
+  const html = `
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <meta name="color-scheme" content="light dark">
+      <style>
+        html, body {
+          margin: 0;
+          padding: 0;
+          background: ${bg};
+          overflow: hidden;
+        }
+
+        /* Target the twitter widget to remove its default margins */
+        .twitter-tweet {
+          margin: 0 !important;
+          padding: 0 !important;
+          width: 100% !important;
+        }
+
+        iframe {
+          border-radius: 12px !important;
+          overflow: hidden !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+      </style>
+    </head>
+    <body id="tweet-container">
+      <blockquote class="twitter-tweet" data-theme="${theme}">
+        <a href="https://twitter.com/i/status/${tweetId}"></a>
+      </blockquote>
+
+      <script async src="https://platform.twitter.com/widgets.js"></script>
+
+      <script>
+        function sendHeight() {
+          const container = document.getElementById('tweet-container');
+          const h = container ? container.offsetHeight : document.documentElement.scrollHeight;
+          window.ReactNativeWebView.postMessage(h.toString());
+        }
+
+        function observe() {
+          const observer = new MutationObserver(sendHeight);
+          observer.observe(document.body, { childList: true, subtree: true });
+        }
+
+        function load() {
+          if (window.twttr && window.twttr.widgets) {
+            window.twttr.widgets.load().then(() => {
+              // Periodically check height as images/content expands
+              const intervals = [300, 800, 1500, 2500, 4000];
+              intervals.forEach(ms => setTimeout(sendHeight, ms));
+              observe();
+            });
+          } else {
+            setTimeout(load, 300);
+          }
+        }
+
+        document.addEventListener("DOMContentLoaded", load);
+      </script>
+    </body>
+  </html>
+  `;
+
+  return (
+    <View
+      style={{
+        height,
+        backgroundColor: bg,
+        borderRadius: 12,
+        overflow: 'hidden',
+      }}
+      pointerEvents={interactive ? 'auto' : 'none'}
+    >
+      <WebView
+        originWhitelist={['*']}
+        source={{ html }}
+        javaScriptEnabled
+        domStorageEnabled
+        mixedContentMode="always"
+        scrollEnabled={false}
+        style={{ flex: 1, backgroundColor: 'transparent' }}
+
+        startInLoadingState={true}
+        renderLoading={() => (
+          <View
+            style={{
+              height: 120,
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: 8,
+              backgroundColor: bg,
+            }}
+          >
+            <Ionicons
+              name="logo-twitter"
+              size={24}
+              color={tokens.colors.textMuted}
             />
-        </View>
-    );
-}
+            <DSText size="sm" color="textMuted">
+              Loading tweet...
+            </DSText>
+          </View>
+        )}
 
+        onMessage={(event) => {
+          const h = Number(event.nativeEvent.data);
+          if (h && Math.abs(h - height) > 2) setHeight(h);
+        }}
+      />
+    </View>
+  );
+}

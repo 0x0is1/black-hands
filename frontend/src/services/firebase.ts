@@ -1,33 +1,35 @@
-import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth } from 'firebase/auth';
+import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
+import { initializeAuth, getReactNativePersistence, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
-import Constants from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const extra = Constants.expoConfig?.extra as {
-    firebaseApiKey: string;
-    firebaseAuthDomain: string;
-    firebaseProjectId: string;
-    firebaseStorageBucket: string;
-    firebaseMessagingSenderId: string;
-    firebaseAppId: string;
-} | undefined;
-
-const firebaseConfig = {
-    apiKey: extra?.firebaseApiKey ?? '',
-    authDomain: extra?.firebaseAuthDomain ?? '',
-    projectId: extra?.firebaseProjectId ?? '',
-    storageBucket: extra?.firebaseStorageBucket ?? '',
-    messagingSenderId: extra?.firebaseMessagingSenderId ?? '',
-    appId: extra?.firebaseAppId ?? '',
-};
-
-let app: FirebaseApp;
-if (getApps().length === 0) {
-    app = initializeApp(firebaseConfig);
-} else {
-    app = getApps()[0];
+declare global {
+    // eslint-disable-next-line no-var
+    var __firebaseApp: FirebaseApp | undefined;
+    // eslint-disable-next-line no-var
+    var __firebaseAuth: Auth | undefined;
 }
 
-export const auth: Auth = getAuth(app);
-export const db: Firestore = getFirestore(app);
+const firebaseConfig = {
+    apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY ?? '',
+    authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN ?? '',
+    projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID ?? '',
+    storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET ?? '',
+    messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? '',
+    appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID ?? '',
+};
 
+if (!global.__firebaseApp) {
+    global.__firebaseApp = getApps().length === 0
+        ? initializeApp(firebaseConfig)
+        : getApp();
+}
+
+if (!global.__firebaseAuth) {
+    global.__firebaseAuth = initializeAuth(global.__firebaseApp, {
+        persistence: getReactNativePersistence(AsyncStorage),
+    });
+}
+
+export const auth: Auth = global.__firebaseAuth;
+export const db: Firestore = getFirestore(global.__firebaseApp);

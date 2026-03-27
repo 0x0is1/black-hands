@@ -64,4 +64,25 @@ export class VoteService {
             }
         });
     }
+
+    static async removeVote(userId: string, postId: string): Promise<void> {
+        const voteId = VoteService.sanitizeVoteId(userId, postId);
+        const voteRef = db.collection('votes').doc(voteId);
+        const postRef = db.collection('posts').doc(postId);
+
+        await db.runTransaction(async (tx) => {
+            const [voteDoc, postDoc] = await Promise.all([tx.get(voteRef), tx.get(postRef)]);
+            if (!voteDoc.exists) return;
+            const vote = voteDoc.data() as Vote;
+            if (postDoc.exists) {
+                const post = postDoc.data() as { upvotes: number; downvotes: number };
+                if (vote.type === 'up') {
+                    tx.update(postRef, { upvotes: Math.max(0, (post.upvotes ?? 0) - 1) });
+                } else {
+                    tx.update(postRef, { downvotes: Math.max(0, (post.downvotes ?? 0) - 1) });
+                }
+            }
+            tx.delete(voteRef);
+        });
+    }
 }

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { castVote, getVote } from '@controllers/voteController';
+import { castVote, getVote, removeVote } from '@controllers/voteController';
 import { requireAuth } from '@middleware/auth';
 import { validate } from '@middleware/validate';
 import { voteLimiter } from '@middleware/rateLimiter';
@@ -9,5 +9,6 @@ const router = Router();
 
 router.get('/:postId', requireAuth, getVote);
 router.post('/:postId', voteLimiter, requireAuth, validate(voteSchema), castVote);
+router.delete('/:postId', requireAuth, removeVote);
 
 export default router;
