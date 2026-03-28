@@ -66,7 +66,7 @@ process.on('unhandledRejection', (reason) => {
 });
 
 app.listen(env.PORT, '0.0.0.0', () => {
-    logger.info(`Gems of Congress API running on port ${env.PORT} on all interfaces (0.0.0.0)`, { env: env.NODE_ENV });
+    logger.info(`GoC API running on port ${env.PORT} on all interfaces (0.0.0.0)`, { env: env.NODE_ENV });
 });
 
 export default app;
