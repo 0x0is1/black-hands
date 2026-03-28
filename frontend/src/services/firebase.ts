@@ -1,4 +1,5 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
+// @ts-ignore - getReactNativePersistence is available in the React Native build of Firebase but not in the standard types
 import { initializeAuth, getReactNativePersistence, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,6 +9,30 @@ declare global {
     var __firebaseApp: FirebaseApp | undefined;
     // eslint-disable-next-line no-var
     var __firebaseAuth: Auth | undefined;
+}
+
+if (!process.env.EXPO_PUBLIC_FIREBASE_API_KEY) {
+    console.error('❌ Firebase API Key is missing! Check your .env file and ensure EXPO_PUBLIC_FIREBASE_API_KEY is set.');
+}
+
+if (!process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN) {
+    console.error('❌ Firebase Auth Domain is missing! Check your .env file and ensure EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN is set.');
+}
+
+if (!process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID) {
+    console.error('❌ Firebase Project ID is missing! Check your .env file and ensure EXPO_PUBLIC_FIREBASE_PROJECT_ID is set.');
+}
+
+if (!process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET) {
+    console.error('❌ Firebase Storage Bucket is missing! Check your .env file and ensure EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET is set.');
+}
+
+if (!process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID) {
+    console.error('❌ Firebase Messaging Sender ID is missing! Check your .env file and ensure EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID is set.');
+}
+
+if (!process.env.EXPO_PUBLIC_FIREBASE_APP_ID) {
+    console.error('❌ Firebase App ID is missing! Check your .env file and ensure EXPO_PUBLIC_FIREBASE_APP_ID is set.');
 }
 
 const firebaseConfig = {
