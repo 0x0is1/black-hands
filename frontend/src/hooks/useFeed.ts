@@ -11,7 +11,7 @@ interface FeedHookState {
 }
 
 interface FeedHook extends FeedHookState {
-    refresh: () => Promise<void>;
+    refresh: (bypassCache?: boolean) => Promise<void>;
     loadMore: () => Promise<void>;
     setSort: (sort: 'latest' | 'top') => void;
     setTag: (tag: string | null) => void;
@@ -30,10 +30,13 @@ export function useFeed(initialSort: 'latest' | 'top' = 'latest', initialTag: st
         hasMore: false,
     });
 
-    const fetchFeed = useCallback(async (isRefresh: boolean, startCursor?: string) => {
-        setState((prev) => ({ ...prev, loading: true, error: null }));
+    const fetchFeed = useCallback(async (isRefresh: boolean, startCursor?: string, bypassCache?: boolean) => {
+        if (!startCursor) {
+            setState((prev) => ({ ...prev, loading: true, error: null }));
+        }
+
         try {
-            const result = await apiFeed(startCursor, sort, tag ?? undefined);
+            const result = await apiFeed(startCursor, sort, tag ?? undefined, bypassCache);
 
             setState((prev) => ({
                 posts: isRefresh ? result.posts : [...prev.posts, ...result.posts],
@@ -52,12 +55,10 @@ export function useFeed(initialSort: 'latest' | 'top' = 'latest', initialTag: st
         }
     }, [sort, tag]);
 
-    
     useEffect(() => {
         fetchFeed(true);
     }, [sort, tag, fetchFeed]);
 
-    
     useEffect(() => {
         if (initialSort !== sort) setSort(initialSort);
     }, [initialSort]);
@@ -66,8 +67,8 @@ export function useFeed(initialSort: 'latest' | 'top' = 'latest', initialTag: st
         if (initialTag !== tag) setTag(initialTag);
     }, [initialTag]);
 
-    const refresh = useCallback(async () => {
-        await fetchFeed(true);
+    const refresh = useCallback(async (bypassCache?: boolean) => {
+        await fetchFeed(true, undefined, bypassCache);
     }, [fetchFeed]);
 
     const loadMore = useCallback(async () => {
@@ -77,4 +78,3 @@ export function useFeed(initialSort: 'latest' | 'top' = 'latest', initialTag: st
 
     return { ...state, refresh, loadMore, setSort, setTag, sort, tag };
 }
-

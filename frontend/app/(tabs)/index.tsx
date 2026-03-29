@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, FlatList, RefreshControl, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, FlatList, RefreshControl, StyleSheet, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useScrollToTop } from '@react-navigation/native';
@@ -24,6 +24,7 @@ export default function HomeFeed() {
 
     const { posts, loading, error, refresh, loadMore, sort, tag: activeTag, hasMore } = useFeed(initialSort, tag || null);
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [refreshKey, setRefreshKey] = useState(0);
     const [isOffline, setIsOffline] = useState(false);
     const flatListRef = React.useRef<FlatList>(null);
     useScrollToTop(flatListRef);
@@ -37,7 +38,8 @@ export default function HomeFeed() {
 
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true);
-        await refresh();
+        setRefreshKey(prev => prev + 1);
+        await refresh(true);
         setIsRefreshing(false);
     }, [refresh]);
 
@@ -47,7 +49,6 @@ export default function HomeFeed() {
         const unsubscribe = navigation.addListener('tabPress', (e: any) => {
             const isFocused = navigation.isFocused();
             if (isFocused && !tag) {
-                
                 flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
                 handleRefresh();
             }
@@ -60,17 +61,21 @@ export default function HomeFeed() {
         backgroundColor: tokens.colors.background,
     };
 
-    const renderItem = useCallback(({ item }: { item: Post }) => <FeedCard post={item} />, []);
+    const renderItem = useCallback(({ item }: { item: Post }) => (
+        <FeedCard post={item} refreshKey={refreshKey} />
+    ), [refreshKey]);
+
     const keyExtractor = useCallback((item: Post) => item.id, []);
-    const separator = useCallback(() => <View style={{ height: 0 }} />, []);
 
     if (loading && posts.length === 0) {
         return (
             <View style={screenStyle}>
                 <NavBar />
-                <DSSkeletonCard />
-                <DSSkeletonCard />
-                <DSSkeletonCard />
+                <View style={{ gap: 0 }}>
+                    <DSSkeletonCard />
+                    <DSSkeletonCard />
+                    <DSSkeletonCard />
+                </View>
             </View>
         );
     }
@@ -89,7 +94,6 @@ export default function HomeFeed() {
             <NavBar />
             {isOffline && <OfflineBanner />}
 
-            {}
             <View style={[styles.filterBar, {
                 backgroundColor: tokens.colors.surface,
                 borderBottomColor: tokens.colors.border
@@ -135,7 +139,9 @@ export default function HomeFeed() {
                         }]}
                         onPress={() => router.setParams({ tag: undefined })}
                     >
-                        <DSText size="xs" weight="bold" color="accent">#{activeTag.toUpperCase()}</DSText>
+                        <DSText size="xs" weight="bold" color="accent">
+                            {activeTag.replace(/^#/, '').toUpperCase()}
+                        </DSText>
                         <Ionicons name="close-circle" size={14} color={tokens.colors.accent} />
                     </TouchableOpacity>
                 )}
@@ -146,7 +152,6 @@ export default function HomeFeed() {
                 data={posts}
                 renderItem={renderItem}
                 keyExtractor={keyExtractor}
-                ItemSeparatorComponent={separator}
                 ListEmptyComponent={<EmptyState />}
                 ListFooterComponent={
                     <View style={{ paddingVertical: 20 }}>
@@ -155,7 +160,7 @@ export default function HomeFeed() {
                         ) : !hasMore && posts.length > 0 ? (
                             <View style={{ alignItems: 'center', padding: 20 }}>
                                 <DSText size="sm" color="textMuted" weight="medium">
-                                    📜 YOU'VE REACHED THE END OF THE ARCHIVE
+                                    YOU&apos;VE REACHED THE END OF THE ARCHIVE
                                 </DSText>
                             </View>
                         ) : null}
@@ -171,6 +176,10 @@ export default function HomeFeed() {
                 }
                 onEndReached={loadMore}
                 onEndReachedThreshold={0.5}
+                removeClippedSubviews={Platform.OS === 'android'}
+                initialNumToRender={5}
+                maxToRenderPerBatch={5}
+                windowSize={10}
                 contentContainerStyle={{
                     flexGrow: 1,
                     paddingBottom: tokens.layout.screenPaddingBottom
@@ -188,13 +197,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 12,
         gap: 12,
-        backgroundColor: 'rgba(0,0,0,0.02)',
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(0,0,0,0.05)',
     },
     sortContainer: {
         flexDirection: 'row',
-        backgroundColor: 'rgba(0,0,0,0.05)',
         borderRadius: 20,
         padding: 2,
     },
@@ -203,18 +209,13 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
         borderRadius: 18,
     },
-    activeSort: {
-        backgroundColor: '#000',
-    },
     activeTagBadge: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 4,
-        backgroundColor: 'rgba(0,0,0,0.03)',
         paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: 'rgba(0,0,0,0.1)',
     }
 });

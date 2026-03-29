@@ -104,7 +104,7 @@ export default function PostDetail() {
                     </View>
 
                     <View style={styles.actionRow}>
-                        <VoteButtons postId={post.id} upvotes={post.upvotes} downvotes={post.downvotes} iconSize={24} />
+                        <VoteButtons postId={post.id} upvotes={post.upvotes} downvotes={post.downvotes} iconSize={18} />
                         <WaybackButton
                             waybackUrl={post.waybackUrl}
                             snapshotScreenshot={post.snapshotScreenshot}
@@ -118,7 +118,7 @@ export default function PostDetail() {
                                 label={tag.replace(/^#/, '')}
                                 variant="solid"
                                 size="sm"
-                                onPress={() => router.push({ pathname: '/', params: { tag } })}
+                                onPress={() => router.push({ pathname: '/', params: { tag: tag.replace(/^#/, '') } })}
                             />
                         ))}
                     </View>
@@ -129,6 +129,27 @@ export default function PostDetail() {
                         html={post.tweetEmbedHtml}
                         onLoadStatus={setTweetStatus}
                     />
+
+                    {post.snapshotScreenshot && (
+                        <TouchableOpacity
+                            activeOpacity={0.9}
+                            style={styles.snapshotSection}
+                            onPress={() => {
+                                playClick();
+                                router.push({ pathname: '/post/[id]', params: { id: post.id, showImage: 'true' } });
+                            }}
+                        >
+                            <DSText size="xs" weight="bold" color="textMuted" style={{ marginBottom: 12 }}>
+                                INTERNAL ARCHIVE SNAPSHOT (TAP TO EXPAND)
+                            </DSText>
+                            <Image
+                                source={{ uri: post.snapshotScreenshot }}
+                                style={styles.snapshotImage}
+                                resizeMode="contain"
+                            />
+                        </TouchableOpacity>
+                    )}
+
                     <Markdown style={markdownStyles}>{post.description}</Markdown>
                     {post.youtubeLink && <YouTubeEmbed url={post.youtubeLink} />}
                     <DSDivider />
@@ -138,68 +159,46 @@ export default function PostDetail() {
                             SOURCES & VERIFICATION
                         </DSText>
 
-                        {post.articleLinks && post.articleLinks.length > 0 && (
-                            <View style={styles.urlList}>
-                                {post.articleLinks
-                                    .filter(link =>
-                                        !link.includes('twitter.com') &&
-                                        !link.includes('x.com') &&
-                                        !link.includes('gemsofcongress.com')
-                                    )
-                                    .map((link, idx) => (
-                                        <TouchableOpacity
-                                            key={idx}
-                                            activeOpacity={0.7}
-                                            onPress={() => {
-                                                playClick();
-                                                router.push(link as any);
-                                            }}
-                                            style={styles.urlItem}
-                                        >
-                                            <Ionicons name="newspaper-outline" size={16} color={tokens.colors.accent} />
-                                            <DSText size="sm" weight="medium" color="accent" numberOfLines={1} style={{ flex: 1 }}>
-                                                {link}
-                                            </DSText>
-                                        </TouchableOpacity>
-                                    ))
-                                }
-                                {tweetStatus === 'error' && post.tweetUrl && (
+                        <View style={styles.urlList}>
+                            {post.articleLinks && post.articleLinks
+                                .filter(link =>
+                                    !link.includes('twitter.com') &&
+                                    !link.includes('x.com') &&
+                                    !link.includes('gemsofcongress.com')
+                                )
+                                .map((link, idx) => (
                                     <TouchableOpacity
+                                        key={idx}
                                         activeOpacity={0.7}
                                         onPress={() => {
                                             playClick();
-                                            router.push(post.tweetUrl as any);
+                                            router.push(link as any);
                                         }}
                                         style={styles.urlItem}
                                     >
-                                        <Ionicons name="logo-twitter" size={16} color={tokens.colors.accent} />
+                                        <Ionicons name="newspaper-outline" size={16} color={tokens.colors.accent} />
                                         <DSText size="sm" weight="medium" color="accent" numberOfLines={1} style={{ flex: 1 }}>
-                                            Original Tweet (Deleted Content Reference)
+                                            {link}
                                         </DSText>
                                     </TouchableOpacity>
-                                )}
-                            </View>
-                        )}
-
-                        {post.snapshotScreenshot && (
-                            <TouchableOpacity
-                                activeOpacity={0.9}
-                                style={styles.snapshotSection}
-                                onPress={() => {
-                                    playClick();
-                                    router.push({ pathname: '/post/[id]', params: { id: post.id, showImage: 'true' } });
-                                }}
-                            >
-                                <DSText size="xs" weight="bold" color="textMuted" style={{ marginBottom: 12 }}>
-                                    INTERNAL ARCHIVE SNAPSHOT (TAP TO EXPAND)
-                                </DSText>
-                                <Image
-                                    source={{ uri: post.snapshotScreenshot }}
-                                    style={styles.snapshotImage}
-                                    resizeMode="contain"
-                                />
-                            </TouchableOpacity>
-                        )}
+                                ))
+                            }
+                            {tweetStatus === 'error' && post.tweetUrl && (
+                                <TouchableOpacity
+                                    activeOpacity={0.7}
+                                    onPress={() => {
+                                        playClick();
+                                        router.push(post.tweetUrl as any);
+                                    }}
+                                    style={styles.urlItem}
+                                >
+                                    <Ionicons name="logo-twitter" size={16} color={tokens.colors.accent} />
+                                    <DSText size="sm" weight="medium" color="accent" numberOfLines={1} style={{ flex: 1 }}>
+                                        Original Tweet (Deleted Content Reference)
+                                    </DSText>
+                                </TouchableOpacity>
+                            )}
+                        </View>
                     </View>
                 </View>
             </ScrollView>
@@ -251,11 +250,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         gap: 8,
-        marginTop: 12,
+        marginTop: 4,
         marginBottom: 8,
     },
     evidenceSection: {
-        marginTop: 12,
+        marginTop: 4,
         padding: 16,
         backgroundColor: 'rgba(0,0,0,0.02)',
         borderRadius: 16,
@@ -264,7 +263,6 @@ const styles = StyleSheet.create({
     },
     urlList: {
         gap: 8,
-        marginBottom: 20,
     },
     urlItem: {
         flexDirection: 'row',
@@ -275,9 +273,9 @@ const styles = StyleSheet.create({
         borderRadius: 12,
     },
     snapshotSection: {
-        marginTop: 8,
+        marginTop: 4,
         padding: 12,
-        backgroundColor: '#fff',
+        backgroundColor: 'rgba(0,0,0,0.01)',
         borderRadius: 12,
         borderWidth: 1,
         borderColor: 'rgba(0,0,0,0.05)',

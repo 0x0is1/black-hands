@@ -22,7 +22,7 @@ interface VoteButtonsProps {
 }
 
 export function VoteButtons({ postId, upvotes, downvotes, iconSize = 18 }: VoteButtonsProps) {
-    const { tokens } = useTheme();
+    const { tokens, colorMode } = useTheme();
     const { currentVote, upvotes: currentUpvotes, downvotes: currentDownvotes, vote } = useVote(postId, upvotes, downvotes);
 
     const upScale = useSharedValue(1);
@@ -36,8 +36,8 @@ export function VoteButtons({ postId, upvotes, downvotes, iconSize = 18 }: VoteB
     async function handleVote(type: VoteType) {
         const scale = type === 'up' ? upScale : downScale;
         scale.value = withSequence(
-            withSpring(1.15, { damping: 10, stiffness: 100 }),
-            withSpring(1, { damping: 10, stiffness: 100 })
+            withSpring(1.1, { damping: 15, stiffness: 200 }),
+            withSpring(1, { damping: 15, stiffness: 200 })
         );
 
         if (type !== currentVote && type !== null) {
@@ -57,7 +57,7 @@ export function VoteButtons({ postId, upvotes, downvotes, iconSize = 18 }: VoteB
                 <Animated.View
                     style={[
                         styles.pill,
-                        { backgroundColor: upActive ? tokens.colors.accent : tokens.colors.surface2 },
+                        { backgroundColor: upActive ? tokens.colors.accent : (colorMode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)') },
                         upStyle
                     ]}
                 >
@@ -80,7 +80,7 @@ export function VoteButtons({ postId, upvotes, downvotes, iconSize = 18 }: VoteB
                 <Animated.View
                     style={[
                         styles.pill,
-                        { backgroundColor: downActive ? tokens.colors.accent : tokens.colors.surface2 },
+                        { backgroundColor: downActive ? tokens.colors.accent : (colorMode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)') },
                         downStyle
                     ]}
                 >
@@ -105,16 +105,15 @@ export function VoteButtons({ postId, upvotes, downvotes, iconSize = 18 }: VoteB
 const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
-        gap: 8,
+        gap: 6, // Reduced gap to avoid overlap in narrow containers
         alignItems: 'center',
     },
     pill: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 3,
-        paddingHorizontal: 10,
-        paddingVertical: 6,
+        paddingHorizontal: 8, // Reduced padding for compactness
+        paddingVertical: 5,
         borderRadius: 20,
     },
 });
-

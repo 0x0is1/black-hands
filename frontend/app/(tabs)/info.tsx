@@ -66,7 +66,7 @@ export default function InfoScreen() {
 
                 <Section title="Feedback" icon="chatbubble-ellipses-outline">
                     <DSText size="base" color="textMuted" style={styles.paragraph}>
-                        Help us improve! We're in active development and would love to hear your thoughts on new features or bugs.
+                        Help us improve! We&apos;re in active development and would love to hear your thoughts on new features or bugs.
                     </DSText>
                     <DSButton
                         label="Give Feedback"

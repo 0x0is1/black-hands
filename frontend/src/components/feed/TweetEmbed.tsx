@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import WebView from 'react-native-webview';
 import { useTheme } from '@contexts/ThemeContext';
@@ -9,26 +9,28 @@ interface TweetEmbedProps {
   tweetUrl?: string;
   html?: string;
   interactive?: boolean;
+  refreshKey?: string | number;
   onLoadStatus?: (status: 'loading' | 'loaded' | 'error') => void;
 }
 
-export function TweetEmbed({ tweetUrl, html: rawHtml, interactive = true, onLoadStatus }: TweetEmbedProps) {
+const getTweetId = (url?: string) => {
+  if (!url) return null;
+  const match = url.match(/status\/(\d+)/);
+  return match ? match[1] : null;
+};
+
+export const TweetEmbed = memo(({ tweetUrl, html: rawHtml, interactive = true, refreshKey, onLoadStatus }: TweetEmbedProps) => {
   const { tokens, colorMode } = useTheme();
   const [height, setHeight] = useState(150);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const hasReceivedUpdate = useRef(false);
 
-  const getTweetId = (url?: string) => {
-    if (!url) return null;
-    const match = url.match(/status\/(\d+)/);
-    return match ? match[1] : null;
-  };
-
   const tweetId = getTweetId(tweetUrl);
-  if (!tweetId) return null;
 
   useEffect(() => {
+    if (!tweetId) return;
+
     setHeight(150);
     setIsLoading(true);
     setIsError(false);
@@ -40,10 +42,10 @@ export function TweetEmbed({ tweetUrl, html: rawHtml, interactive = true, onLoad
         setIsLoading(false);
         onLoadStatus?.('error');
       }
-    }, 15000);
+    }, 8000);
 
     return () => clearTimeout(timer);
-  }, [tweetId]);
+  }, [tweetId, refreshKey, onLoadStatus]);
 
   const onWebViewMessage = (event: any) => {
     const h = parseInt(event.nativeEvent.data);
@@ -60,6 +62,8 @@ export function TweetEmbed({ tweetUrl, html: rawHtml, interactive = true, onLoad
 
   const theme = colorMode === 'light' ? 'light' : 'dark';
   const bg = tokens?.colors?.surface2 || '#000';
+
+  if (!tweetId) return null;
 
   if (isError) {
     return (
@@ -98,7 +102,6 @@ export function TweetEmbed({ tweetUrl, html: rawHtml, interactive = true, onLoad
           overflow: hidden;
         }
 
-        /* Target the twitter widget to remove its default margins */
         .twitter-tweet {
           margin: 0 !important;
           padding: 0 !important;
@@ -135,7 +138,6 @@ export function TweetEmbed({ tweetUrl, html: rawHtml, interactive = true, onLoad
         function load() {
           if (window.twttr && window.twttr.widgets) {
             window.twttr.widgets.load().then(() => {
-              // Periodically check height as images/content expands
               const intervals = [300, 800, 1500, 2500, 4000];
               intervals.forEach(ms => setTimeout(sendHeight, ms));
               observe();
@@ -186,6 +188,7 @@ export function TweetEmbed({ tweetUrl, html: rawHtml, interactive = true, onLoad
       >
         <WebView
           originWhitelist={['*']}
+          key={refreshKey}
           source={{ html: htmlContent }}
           javaScriptEnabled
           domStorageEnabled
@@ -197,4 +200,6 @@ export function TweetEmbed({ tweetUrl, html: rawHtml, interactive = true, onLoad
       </View>
     </View>
   );
-}
+});
+
+TweetEmbed.displayName = 'TweetEmbed';

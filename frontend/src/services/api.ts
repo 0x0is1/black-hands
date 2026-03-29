@@ -4,23 +4,53 @@ import { Post, Vote, UserProfile, PaginatedResponse, ApiResponse } from '@appTyp
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || (Platform.OS === 'android' ? 'http://10.0.2.2:3000/api' : 'http://localhost:3000/api');
 
-async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+const cache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL = 5 * 60 * 1000;
+
+function getCached<T>(key: string): T | null {
+    const entry = cache.get(key);
+    if (!entry) return null;
+    if (Date.now() - entry.timestamp > CACHE_TTL) {
+        cache.delete(key);
+        return null;
+    }
+    return entry.data;
+}
+
+function setCache(key: string, data: any) {
+    cache.set(key, { data, timestamp: Date.now() });
+}
+
+export function clearApiCache() {
+    cache.clear();
+}
+
+async function fetchApi<T>(endpoint: string, options: RequestInit & { bypassCache?: boolean } = {}): Promise<T> {
+    const method = options.method || 'GET';
+    const isGet = method.toUpperCase() === 'GET';
+
+    const { bypassCache, ...fetchOptions } = options;
+
+    if (isGet && !bypassCache) {
+        const cached = getCached<T>(endpoint);
+        if (cached) return cached;
+    }
+
     const token = await auth.currentUser?.getIdToken(true);
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-        ...(options.headers as Record<string, string>),
+        ...(fetchOptions.headers as Record<string, string>),
     };
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;
     }
 
-    
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3 * 60 * 1000);
 
     try {
         const response = await fetch(`${API_BASE}${endpoint}`, {
-            ...options,
+            ...fetchOptions,
             headers,
             cache: 'no-store',
             signal: controller.signal
@@ -39,6 +69,13 @@ async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise
         if (!response.ok) {
             throw new Error(data.error || data.message || `API Error ${response.status}`);
         }
+
+        if (isGet) {
+            setCache(endpoint, data);
+        } else {
+            cache.clear();
+        }
+
         return data as T;
     } catch (err: any) {
         clearTimeout(timeoutId);
@@ -55,13 +92,14 @@ interface FeedResult {
 export async function getFeed(
     cursor?: string,
     sort: 'latest' | 'top' = 'latest',
-    tag?: string
+    tag?: string,
+    bypassCache?: boolean
 ): Promise<FeedResult> {
     let url = `/posts?limit=10&sort=${sort}`;
     if (cursor) url += `&cursor=${cursor}`;
     if (tag) url += `&tag=${encodeURIComponent(tag)}`;
 
-    const res = await fetchApi<PaginatedResponse<Post>>(url);
+    const res = await fetchApi<PaginatedResponse<Post>>(url, { bypassCache });
     return {
         posts: res.data || [],
         cursor: res.meta?.cursor || null,
@@ -69,8 +107,8 @@ export async function getFeed(
     };
 }
 
-export async function getPost(id: string): Promise<Post> {
-    const res = await fetchApi<ApiResponse<Post>>(`/posts/${id}`);
+export async function getPost(id: string, bypassCache?: boolean): Promise<Post> {
+    const res = await fetchApi<ApiResponse<Post>>(`/posts/${id}`, { bypassCache });
     if (!res.data) throw new Error('Post not found');
     return res.data;
 }
@@ -107,12 +145,7 @@ export async function votePost(postId: string, type: 'up' | 'down'): Promise<Vot
     return res.data!;
 }
 
-
-
-
 export async function removeVote(postId: string): Promise<VoteResult> {
-    
-    
     const res = await fetchApi<ApiResponse<VoteResult>>(`/votes/${postId}?remove=true`, { method: 'DELETE' }).catch(() => null);
     if (!res) throw new Error("Vote removal not implemented cleanly on backend yet");
     return res.data!;

@@ -1,0 +1,110 @@
+
+> goc-app@0.1.5 lint
+> expo lint
+
+env: load .env
+env: export EXPO_PUBLIC_API_URL EXPO_PUBLIC_FIREBASE_API_KEY EXPO_PUBLIC_FIREBASE_APP_ID EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID EXPO_PUBLIC_FIREBASE_PROJECT_ID EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID
+
+D:\codes\oss-goc-app\frontend\app\(tabs)\index.tsx
+    9:10  warning  'DSDivider' is defined but never used                            @typescript-eslint/no-unused-vars
+   46:24  warning  A `require()` style import is forbidden                          @typescript-eslint/no-require-imports
+  163:40  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+D:\codes\oss-goc-app\frontend\app\(tabs)\info.tsx
+   2:49  warning  'TouchableOpacity' is defined but never used                     @typescript-eslint/no-unused-vars
+  69:44  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+D:\codes\oss-goc-app\frontend\app\(tabs)\profile.tsx
+   2:28  warning  'FlatList' is defined but never used                                                        @typescript-eslint/no-unused-vars
+   2:56  warning  'D:\codes\oss-goc-app\frontend\node_modules\react-native\index.js' imported multiple times  import/no-duplicates
+   5:10  warning  'useSafeAreaInsets' is defined but never used                                               @typescript-eslint/no-unused-vars
+  17:10  warning  'Post' is defined but never used                                                            @typescript-eslint/no-unused-vars
+  20:34  warning  'D:\codes\oss-goc-app\frontend\node_modules\react-native\index.js' imported multiple times  import/no-duplicates
+
+D:\codes\oss-goc-app\frontend\app\_layout.tsx
+   3:23  warning  'D:\codes\oss-goc-app\frontend\node_modules\expo-router\build\index.js' imported multiple times                                  import/no-duplicates
+  23:29  warning  'D:\codes\oss-goc-app\frontend\node_modules\expo-router\build\index.js' imported multiple times                                  import/no-duplicates
+  67:8   warning  React Hook useEffect has missing dependencies: 'fontsLoaded' and 'playTick'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\codes\oss-goc-app\frontend\app\create.tsx
+  5:10  warning  'useSafeAreaInsets' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\codes\oss-goc-app\frontend\app\post\[id].tsx
+   5:10  warning  'useSafeAreaInsets' is defined but never used   @typescript-eslint/no-unused-vars
+  25:21  warning  'colorMode' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\codes\oss-goc-app\frontend\src\components\auth\GoogleSignInButton.tsx
+  2:28  warning  'StyleSheet' is defined but never used  @typescript-eslint/no-unused-vars
+  2:40  warning  'View' is defined but never used        @typescript-eslint/no-unused-vars
+
+D:\codes\oss-goc-app\frontend\src\components\common\AnimatedSplashScreen.tsx
+  11:5   warning  'Extrapolate' is defined but never used                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  53:45  warning  A `require()` style import is forbidden                                                                                                                                                                        @typescript-eslint/no-require-imports
+  87:8   warning  React Hook useEffect has missing dependencies: 'containerOpacity', 'contentOpacity', 'loaderWidth', 'logoOpacity', 'logoScale', and 'onAnimationComplete'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\codes\oss-goc-app\frontend\src\components\common\FAB.tsx
+  2:28  warning  'StyleSheet' is defined but never used  @typescript-eslint/no-unused-vars
+  5:13  warning  'Haptics' is defined but never used     @typescript-eslint/no-unused-vars
+
+D:\codes\oss-goc-app\frontend\src\components\common\OfflineBanner.tsx
+  2:16  warning  'StyleSheet' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\codes\oss-goc-app\frontend\src\components\feed\FeedCard.tsx
+  24:25  error  Component definition is missing display name  react/display-name
+
+D:\codes\oss-goc-app\frontend\src\components\feed\TweetEmbed.tsx
+   2:16  warning  'ActivityIndicator' is defined but never used                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+  16:27  error    Component definition is missing display name                                                                                                                                                                                             react/display-name
+  32:3   error    React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render                                                                                                             react-hooks/rules-of-hooks
+  48:6   warning  React Hook useEffect has a missing dependency: 'onLoadStatus'. Either include it or remove the dependency array. If 'onLoadStatus' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+
+D:\codes\oss-goc-app\frontend\src\components\feed\VoteButtons.tsx
+  4:13  warning  'Haptics' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\codes\oss-goc-app\frontend\src\components\feed\WaybackButton.tsx
+  4:13  warning  'Haptics' is defined but never used            @typescript-eslint/no-unused-vars
+  8:10  warning  'WAYBACK_LOGO_SIZE' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\codes\oss-goc-app\frontend\src\components\post\MarkdownEditor.tsx
+  2:27  warning  'StyleSheet' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\codes\oss-goc-app\frontend\src\contexts\AuthContext.tsx
+  44:49  warning  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  45:42  warning  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  46:43  warning  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  92:66  warning  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+D:\codes\oss-goc-app\frontend\src\contexts\FeedbackContext.tsx
+  45:70  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+  52:69  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+  59:72  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\codes\oss-goc-app\frontend\src\design-system\Avatar.tsx
+  2:46  warning  'StyleSheet' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\codes\oss-goc-app\frontend\src\design-system\Card.tsx
+  2:16  warning  'StyleSheet' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\codes\oss-goc-app\frontend\src\design-system\IconButton.tsx
+  15:13  warning  'tokens' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\codes\oss-goc-app\frontend\src\design-system\Skeleton.tsx
+  2:16  warning  'StyleSheet' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\codes\oss-goc-app\frontend\src\design-system\Text.tsx
+  2:16  warning  'StyleSheet' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\codes\oss-goc-app\frontend\src\hooks\useFeed.ts
+  64:8  warning  React Hook useEffect has a missing dependency: 'sort'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  68:8  warning  React Hook useEffect has a missing dependency: 'tag'. Either include it or remove the dependency array   react-hooks/exhaustive-deps
+
+D:\codes\oss-goc-app\frontend\src\hooks\useProfile.ts
+  41:8  warning  React Hook useEffect has a missing dependency: 'fetchProfile'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\codes\oss-goc-app\frontend\src\services\firebase.ts
+   8:5  warning  Unused eslint-disable directive (no problems were reported from 'no-var')
+  10:5  warning  Unused eslint-disable directive (no problems were reported from 'no-var')
+
+Γ£û 50 problems (5 errors, 45 warnings)
+  0 errors and 4 warnings potentially fixable with the `--fix` option.
+

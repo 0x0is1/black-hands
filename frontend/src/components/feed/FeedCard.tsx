@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -18,9 +18,10 @@ import { useFeedback } from '@contexts/FeedbackContext';
 
 interface FeedCardProps {
   post: Post;
+  refreshKey?: string | number;
 }
 
-export function FeedCard({ post }: FeedCardProps) {
+export const FeedCard = memo(({ post, refreshKey }: FeedCardProps) => {
   const { tokens } = useTheme();
   const { user } = useAuthContext();
   const relativeTime = useRelativeTime(post.createdAt);
@@ -71,7 +72,6 @@ export function FeedCard({ post }: FeedCardProps) {
             </DSText>
           </View>
 
-          { }
           {post.tags && post.tags.length > 0 && (
             <View style={styles.tagContainer}>
               {post.tags.slice(0, 3).map(tag => (
@@ -99,7 +99,12 @@ export function FeedCard({ post }: FeedCardProps) {
             {post.description}
           </DSText>
 
-          <TweetEmbed tweetUrl={post.tweetUrl} html={post.tweetEmbedHtml} interactive={false} />
+          <TweetEmbed
+            tweetUrl={post.tweetUrl}
+            html={post.tweetEmbedHtml}
+            interactive={false}
+            refreshKey={refreshKey}
+          />
         </TouchableOpacity>
 
         <View style={styles.actionRow}>
@@ -118,7 +123,6 @@ export function FeedCard({ post }: FeedCardProps) {
               snapshotScreenshot={post.snapshotScreenshot}
             />
 
-            { }
             <View style={styles.sourceIconsContainer}>
               {post.youtubeLink && (
                 <View style={styles.iconWrapper}>
@@ -147,7 +151,9 @@ export function FeedCard({ post }: FeedCardProps) {
       </View>
     </Animated.View>
   );
-}
+});
+
+FeedCard.displayName = 'FeedCard';
 
 const styles = StyleSheet.create({
   inner: {
