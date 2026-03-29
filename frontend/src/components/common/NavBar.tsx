@@ -56,7 +56,7 @@ export function NavBar({ title, showBack, rightElement }: NavBarProps) {
                         color="textPrimary"
                         style={styles.titleText}
                     >
-                        {title || "Gems of Congress"}
+                        {title || "Black Hands"}
                     </DSText>
                 </View>
 

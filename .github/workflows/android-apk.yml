@@ -8,7 +8,7 @@ on:
     paths:
       - "frontend/android/**"
       - "frontend/ios/**"
-      - "frontend/app.json"
+      - "frontend/app.config.js"
       - "frontend/eas.json"
       - "frontend/package.json"
       - "frontend/package-lock.json"

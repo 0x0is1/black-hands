@@ -39,9 +39,9 @@ export default function InfoScreen() {
                     { paddingBottom: tokens.layout.screenPaddingBottom }
                 ]}
             >
-                <Section title="About Gems of Congress" icon="information-circle-outline">
+                <Section title="About Black Hand" icon="information-circle-outline">
                     <DSText size="base" color="textMuted" style={styles.paragraph}>
-                        Gems of Congress is a community-driven platform dedicated to archiving and discussing the most significant (and often controversial) moments in political discourse.
+                        Black Hands is a community-driven platform dedicated to archiving and discussing the most significant (and often controversial) moments in political discourse.
                     </DSText>
                     <DSText size="base" color="textMuted" style={styles.paragraph}>
                         Our mission is to ensure that critical statements and actions by public officials are preserved and held up for public scrutiny, regardless of how quickly they might be deleted or buried in the news cycle.

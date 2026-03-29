@@ -16,7 +16,7 @@ async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise
 
     // Add timeout to prevent indefinite hanging in emulator networks
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const timeoutId = setTimeout(() => controller.abort(), 3 * 60 * 1000);
 
     try {
         const response = await fetch(`${API_BASE}${endpoint}`, {

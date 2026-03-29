@@ -30,11 +30,36 @@ export default function ProfileScreen() {
         flex: 1,
         backgroundColor: tokens.colors.background,
     };
+    
+    const navRight = (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <TouchableOpacity onPress={() => {
+                playClick();
+                handleTestNotification();
+            }} style={{ padding: 4 }}>
+                <Ionicons
+                    name="notifications-outline"
+                    size={22}
+                    color={tokens.colors.textPrimary}
+                />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => {
+                playTick();
+                toggleTheme();
+            }} style={{ padding: 4 }}>
+                <Ionicons
+                    name={colorMode === 'dark' ? 'sunny-outline' : 'moon-outline'}
+                    size={22}
+                    color={tokens.colors.textPrimary}
+                />
+            </TouchableOpacity>
+        </View>
+    );
 
     if (!user) {
         return (
             <View style={[screenStyle, styles.centered]}>
-                <NavBar title='My Profile' />
+                <NavBar title='My Profile' rightElement={navRight} />
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 16 }}>
                     <Ionicons name="search-outline" size={80} color={tokens.colors.textMuted} />
                     <DSText size="xl" weight="extraBold" color="textPrimary">Join the Conversation</DSText>
@@ -69,30 +94,6 @@ export default function ProfileScreen() {
         });
     };
 
-    const navRight = (
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-            <TouchableOpacity onPress={() => {
-                playClick();
-                handleTestNotification();
-            }} style={{ padding: 4 }}>
-                <Ionicons
-                    name="notifications-outline"
-                    size={22}
-                    color={tokens.colors.textPrimary}
-                />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => {
-                playTick();
-                toggleTheme();
-            }} style={{ padding: 4 }}>
-                <Ionicons
-                    name={colorMode === 'dark' ? 'sunny-outline' : 'moon-outline'}
-                    size={22}
-                    color={tokens.colors.textPrimary}
-                />
-            </TouchableOpacity>
-        </View>
-    );
 
     if (loading && posts.length === 0) {
         return (

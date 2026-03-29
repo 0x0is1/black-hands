@@ -15,7 +15,7 @@ if (process.env.GOOGLE_SERVICES_JSON) {
 
 module.exports = {
     expo: {
-        name: "Gems of Congress",
+        name: "Black Hands",
         slug: "gems-of-congress",
         version: "0.1.5",
         orientation: "portrait",
