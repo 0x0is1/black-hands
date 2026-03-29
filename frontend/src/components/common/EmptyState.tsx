@@ -8,7 +8,7 @@ interface EmptyStateProps {
     message?: string;
 }
 
-export function EmptyState({ message = 'No gems found yet.' }: EmptyStateProps) {
+export function EmptyState({ message = 'No posts found yet.' }: EmptyStateProps) {
     const { tokens } = useTheme();
     return (
         <View style={styles.container}>

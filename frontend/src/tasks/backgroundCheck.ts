@@ -35,13 +35,13 @@ TaskManager.defineTask(BACKGROUND_POST_CHECK_TASK, async () => {
             }
 
             if (newCount > 0) {
-                console.log(`[BackgroundFetch] Found ${newCount} new gems!`);
+                console.log(`[BackgroundFetch] Found ${newCount} new posts!`);
 
                 // 4. Send notification
                 await Notifications.scheduleNotificationAsync({
                     content: {
-                        title: '💎 New Controversy Gems',
-                        body: `${newCount} new controversy ${newCount === 1 ? 'gem has' : 'gems have'} been curated. Check them out!`,
+                        title: 'New Controversy Posts',
+                        body: `${newCount} new controversy ${newCount === 1 ? 'post has' : 'posts have'} been curated. Check them out!`,
                         data: { url: '/(tabs)/' },
                     },
                     trigger: null, // Send immediately
@@ -53,7 +53,7 @@ TaskManager.defineTask(BACKGROUND_POST_CHECK_TASK, async () => {
             }
         }
 
-        console.log('[BackgroundFetch] No new gems found.');
+        console.log('[BackgroundFetch] No new posts found.');
         return BackgroundFetch.BackgroundFetchResult.NoData;
     } catch (error) {
         console.error('[BackgroundFetch] Task failed:', error);
