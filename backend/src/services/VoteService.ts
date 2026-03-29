@@ -24,7 +24,10 @@ export class VoteService {
 
             if (!postDoc.exists) throw new Error('Post not found');
 
-            const post = postDoc.data() as { upvotes: number; downvotes: number };
+            const post = postDoc.data() as any;
+            const authorRef = db.collection('users').doc(post.authorId);
+            const voterRef = db.collection('users').doc(userId);
+
             const currentUpvotes = post.upvotes ?? 0;
             const currentDownvotes = post.downvotes ?? 0;
 
@@ -32,6 +35,8 @@ export class VoteService {
                 tx.set(voteRef, { userId, postId, type, createdAt: FieldValue.serverTimestamp() });
                 if (type === 'up') {
                     tx.update(postRef, { upvotes: currentUpvotes + 1 });
+                    tx.update(authorRef, { upvotesReceived: FieldValue.increment(1) });
+                    tx.update(voterRef, { upvotesGiven: FieldValue.increment(1) });
                 } else {
                     tx.update(postRef, { downvotes: currentDownvotes + 1 });
                 }
@@ -41,26 +46,36 @@ export class VoteService {
             const existingVote = voteDoc.data() as Vote;
 
             if (existingVote.type === type) {
+                // Remove vote (Toggle off)
                 tx.delete(voteRef);
                 if (type === 'up') {
                     tx.update(postRef, { upvotes: Math.max(0, currentUpvotes - 1) });
+                    tx.update(authorRef, { upvotesReceived: FieldValue.increment(-1) });
+                    tx.update(voterRef, { upvotesGiven: FieldValue.increment(-1) });
                 } else {
                     tx.update(postRef, { downvotes: Math.max(0, currentDownvotes - 1) });
                 }
                 return;
             }
 
+            // Switch vote type
             tx.update(voteRef, { type });
             if (type === 'up') {
+                // Down -> Up
                 tx.update(postRef, {
                     upvotes: currentUpvotes + 1,
                     downvotes: Math.max(0, currentDownvotes - 1),
                 });
+                tx.update(authorRef, { upvotesReceived: FieldValue.increment(1) });
+                tx.update(voterRef, { upvotesGiven: FieldValue.increment(1) });
             } else {
+                // Up -> Down
                 tx.update(postRef, {
                     downvotes: currentDownvotes + 1,
                     upvotes: Math.max(0, currentUpvotes - 1),
                 });
+                tx.update(authorRef, { upvotesReceived: FieldValue.increment(-1) });
+                tx.update(voterRef, { upvotesGiven: FieldValue.increment(-1) });
             }
         });
     }
@@ -73,11 +88,17 @@ export class VoteService {
         await db.runTransaction(async (tx) => {
             const [voteDoc, postDoc] = await Promise.all([tx.get(voteRef), tx.get(postRef)]);
             if (!voteDoc.exists) return;
+
             const vote = voteDoc.data() as Vote;
             if (postDoc.exists) {
-                const post = postDoc.data() as { upvotes: number; downvotes: number };
+                const post = postDoc.data() as any;
+                const authorRef = db.collection('users').doc(post.authorId);
+                const voterRef = db.collection('users').doc(userId);
+
                 if (vote.type === 'up') {
                     tx.update(postRef, { upvotes: Math.max(0, (post.upvotes ?? 0) - 1) });
+                    tx.update(authorRef, { upvotesReceived: FieldValue.increment(-1) });
+                    tx.update(voterRef, { upvotesGiven: FieldValue.increment(-1) });
                 } else {
                     tx.update(postRef, { downvotes: Math.max(0, (post.downvotes ?? 0) - 1) });
                 }

@@ -18,6 +18,8 @@ export class UserService {
 
             if (!doc.exists) {
                 payload.createdAt = FieldValue.serverTimestamp();
+                payload.upvotesReceived = 0;
+                payload.upvotesGiven = 0;
                 tx.set(ref, payload);
             } else {
                 tx.update(ref, payload);

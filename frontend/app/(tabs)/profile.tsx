@@ -23,7 +23,7 @@ import { useFeedback } from '@contexts/FeedbackContext';
 export default function ProfileScreen() {
     const { tokens, colorMode, toggleTheme } = useTheme();
     const { user, signOut } = useAuthContext();
-    const { posts, totalUpvotes, loading, refresh } = useProfile(user?.uid ?? '');
+    const { profile, posts, loading, refresh } = useProfile(user?.uid ?? '');
     const { playClick, playTick } = useFeedback();
 
     useFocusEffect(
@@ -136,8 +136,12 @@ export default function ProfileScreen() {
                         <DSText size="sm" color="textMuted">Gems</DSText>
                     </View>
                     <View style={styles.statItem}>
-                        <DSText size="xl" weight="extraBold" color="textPrimary">{String(totalUpvotes)}</DSText>
-                        <DSText size="sm" color="textMuted">Upvotes</DSText>
+                        <DSText size="xl" weight="extraBold" color="textPrimary">{String(profile?.upvotesReceived ?? 0)}</DSText>
+                        <DSText size="sm" color="textMuted">Karma</DSText>
+                    </View>
+                    <View style={styles.statItem}>
+                        <DSText size="xl" weight="extraBold" color="textPrimary">{String(profile?.upvotesGiven ?? 0)}</DSText>
+                        <DSText size="sm" color="textMuted">Votes Cast</DSText>
                     </View>
                 </View>
                 <View style={{ paddingHorizontal: tokens.spacing.lg, marginBottom: tokens.spacing.md }}>

@@ -10,6 +10,7 @@ import Animated, {
     interpolate,
     Extrapolate
 } from 'react-native-reanimated';
+import * as Updates from 'expo-updates';
 import { useTheme } from '@contexts/ThemeContext';
 import { DSText } from '@ds/Text';
 
@@ -29,26 +30,60 @@ export const AnimatedSplashScreen: React.FC<Props> = ({ onAnimationComplete }) =
     const containerOpacity = useSharedValue(1);
 
     useEffect(() => {
+        const initialize = async () => {
+            try {
+                // Start parallel tasks
+                const updateTask = (async () => {
+                    try {
+                        if (!__DEV__) {
+                            const { isAvailable } = await Updates.checkForUpdateAsync();
+                            if (isAvailable) {
+                                await Updates.fetchUpdateAsync();
+                                // We don't reload immediately to avoid jarring experience, 
+                                // but the update is ready for next launch.
+                            }
+                        }
+                    } catch (e) {
+                        console.log('[Splash] Update check failed:', e);
+                    }
+                })();
+
+                const prefetchTask = (async () => {
+                    try {
+                        const { getFeed } = require('@services/api');
+                        await getFeed(); // Prefetch latest feed
+                    } catch (e) {
+                        console.log('[Splash] Prefetch failed:', e);
+                    }
+                })();
+
+                // Minimum animation time combined with tasks
+                await Promise.all([updateTask, prefetchTask, new Promise(r => setTimeout(r, 2500))]);
+            } catch (e) {
+                console.log('[Splash] Initialization error:', e);
+            }
+        };
+
         // Animation Sequence
-        // 1. Logo fades in and scales slightly
         logoOpacity.value = withTiming(1, { duration: 800 });
         logoScale.value = withTiming(1, { duration: 1000, easing: Easing.out(Easing.exp) });
-
-        // 2. Text elements fade in
         contentOpacity.value = withDelay(400, withTiming(1, { duration: 800 }));
 
-        // 3. Loader animates
-        loaderWidth.value = withDelay(600, withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.quad) }));
+        // Loader animates based on a fixed 2.5s duration for smoothness
+        loaderWidth.value = withDelay(600, withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.quad) }));
 
-        // 4. Exit
-        containerOpacity.value = withDelay(
-            2800,
-            withTiming(0, { duration: 600 }, (finished) => {
-                if (finished) {
-                    runOnJS(onAnimationComplete)();
-                }
-            })
-        );
+        // Start tasks
+        initialize().then(() => {
+            // Exit after tasks AND smooth animation (total ~3s)
+            containerOpacity.value = withDelay(
+                500,
+                withTiming(0, { duration: 600 }, (finished) => {
+                    if (finished) {
+                        runOnJS(onAnimationComplete)();
+                    }
+                })
+            );
+        });
     }, []);
 
     const logoAnimatedStyle = useAnimatedStyle(() => ({

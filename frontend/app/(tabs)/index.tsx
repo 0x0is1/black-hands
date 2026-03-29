@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, FlatList, RefreshControl, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, FlatList, RefreshControl, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, router } from 'expo-router';
 import NetInfo from '@react-native-community/netinfo';
@@ -133,10 +133,7 @@ export default function HomeFeed() {
                 ListFooterComponent={
                     <View style={{ paddingVertical: 20 }}>
                         {loading && posts.length > 0 ? (
-                            <View style={{ gap: 16 }}>
-                                <DSSkeletonCard />
-                                <DSSkeletonCard />
-                            </View>
+                            <ActivityIndicator size="small" color={tokens.colors.accent} />
                         ) : !hasMore && posts.length > 0 ? (
                             <View style={{ alignItems: 'center', padding: 20 }}>
                                 <DSText size="sm" color="textMuted" weight="medium">

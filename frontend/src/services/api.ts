@@ -126,6 +126,11 @@ export async function getUserVote(postId: string): Promise<Vote | null> {
     }
 }
 
+export async function getUser(userId: string): Promise<UserProfile> {
+    const res = await fetchApi<ApiResponse<UserProfile>>(`/users/${userId}`);
+    return res.data!;
+}
+
 export async function getUserPosts(userId: string): Promise<Post[]> {
     const res = await fetchApi<PaginatedResponse<Post>>(`/users/${userId}/posts`);
     return res.data || [];

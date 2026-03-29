@@ -35,6 +35,8 @@ export interface UserProfile {
     email: string;
     photoURL: string;
     fcmToken?: string;
+    upvotesReceived: number;
+    upvotesGiven: number;
     createdAt: Timestamp;
 }
 

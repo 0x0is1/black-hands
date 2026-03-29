@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import WebView from 'react-native-webview';
 import { useTheme } from '@contexts/ThemeContext';
@@ -24,8 +24,42 @@ export function TweetEmbed({ tweetUrl, html: rawHtml, interactive = true }: Twee
   const tweetId = getTweetId(tweetUrl);
   if (!tweetId) return null;
 
+  const [isError, setIsError] = useState(false);
+
+  // Fallback timeout: if height doesn't increase significantly after load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (height <= 150) {
+        setIsError(true);
+      }
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, [height]);
+
   const theme = colorMode === 'light' ? 'light' : 'dark';
   const bg = tokens?.colors?.surface2 || '#000';
+
+  if (isError) {
+    return (
+      <View style={{
+        padding: 20,
+        backgroundColor: bg,
+        borderRadius: 12,
+        alignItems: 'center',
+        gap: 12,
+        borderWidth: 1,
+        borderColor: tokens.colors.border
+      }}>
+        <Ionicons name="alert-circle-outline" size={32} color={tokens.colors.textMuted} />
+        <DSText size="sm" color="textPrimary" weight="bold" style={{ textAlign: 'center' }}>
+          This tweet may have been removed or deleted.
+        </DSText>
+        <DSText size="xs" color="textMuted" style={{ textAlign: 'center' }}>
+          You can still view the original context by clicking on the post.
+        </DSText>
+      </View>
+    );
+  }
 
   const html = `
   <!DOCTYPE html>
