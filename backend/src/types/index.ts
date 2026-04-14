@@ -79,6 +79,22 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
     };
 }
 
+export type EditSuggestionStatus = 'pending' | 'approved' | 'rejected';
+
+export interface EditSuggestion {
+    id: string;
+    targetId: string;
+    targetType: 'post' | 'snake';
+    authorId: string;
+    authorName: string;
+    opId: string;
+    originalData: any;
+    suggestedData: any;
+    status: EditSuggestionStatus;
+    createdAt: Timestamp;
+    updatedAt: Timestamp;
+}
+
 export interface AuthenticatedRequest extends Request {
     user?: DecodedIdToken;
 }

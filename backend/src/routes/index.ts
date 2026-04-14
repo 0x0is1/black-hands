@@ -4,6 +4,7 @@ import votesRouter from '@routes/votes';
 import usersRouter from '@routes/users';
 import waybackRouter from '@routes/wayback';
 import cancelledRouter from '@routes/cancelled';
+import suggestionsRouter from '@routes/suggestions';
 
 const router = Router();
 
@@ -12,5 +13,6 @@ router.use('/votes', votesRouter);
 router.use('/users', usersRouter);
 router.use('/wayback', waybackRouter);
 router.use('/cancelled', cancelledRouter);
+router.use('/suggestions', suggestionsRouter);
 
 export default router;
