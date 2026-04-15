@@ -9,7 +9,7 @@ import { DSDivider } from '@ds/Divider';
 import { DSSkeletonCard } from '@ds/Skeleton';
 import { DSBadge } from '@ds/Badge';
 import { ErrorState } from '@components/common/ErrorState';
-import { formatFullDate } from '@utils/formatters';
+import { formatFullDate, formatCompactNumber } from '@utils/formatters';
 import { NavBar } from '@components/common/NavBar';
 import { useFeedback } from '@contexts/FeedbackContext';
 import { useAuthContext } from '@contexts/AuthContext';
@@ -253,7 +253,7 @@ export default function SnakeDetail() {
                             style={[styles.bigVoteBtn, { backgroundColor: upActive ? tokens.colors.accent : tokens.colors.surface2 }]}
                         >
                             <Ionicons name={upActive ? "arrow-up-circle" : "arrow-up-circle-outline"} size={22} color={upActive ? tokens.colors.accentForeground : tokens.colors.textMuted} />
-                            <DSText size="sm" weight="bold" color={upActive ? 'accentForeground' : 'textMuted'}>{person.upvotes}</DSText>
+                            <DSText size="sm" weight="bold" color={upActive ? 'accentForeground' : 'textMuted'}>{formatCompactNumber(person.upvotes)}</DSText>
                         </TouchableOpacity>
                     </Animated.View>
 
@@ -263,7 +263,7 @@ export default function SnakeDetail() {
                             style={[styles.bigVoteBtn, { backgroundColor: downActive ? tokens.colors.danger : tokens.colors.surface2 }]}
                         >
                             <Ionicons name={downActive ? "arrow-down-circle" : "arrow-down-circle-outline"} size={22} color={downActive ? tokens.colors.accentForeground : tokens.colors.textMuted} />
-                            <DSText size="sm" weight="bold" color={downActive ? 'accentForeground' : 'textMuted'}>{person.downvotes}</DSText>
+                            <DSText size="sm" weight="bold" color={downActive ? 'accentForeground' : 'textMuted'}>{formatCompactNumber(person.downvotes)}</DSText>
                         </TouchableOpacity>
                     </Animated.View>
                 </View>

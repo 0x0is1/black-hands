@@ -11,6 +11,7 @@ import { useFeedback } from '@contexts/FeedbackContext';
 import { deleteCancelledPerson } from '@services/api';
 import { useSnakeVote } from '@hooks/useSnakeVote';
 import { MarkdownBody } from '@components/common/MarkdownBody';
+import { formatCompactNumber } from '@utils/formatters';
 
 interface SnakeCardProps {
     person: CancelledPerson;
@@ -78,7 +79,7 @@ export const SnakeCard = memo(({ person, onRefresh }: SnakeCardProps) => {
 
                     <View style={styles.info}>
                         <View style={styles.nameRow}>
-                            <DSText size="xl" weight="extraBold" color="textPrimary" numberOfLines={1} style={{ flex: 1 }}>
+                            <DSText size="lg" weight="extraBold" color="textPrimary" numberOfLines={1} style={{ flex: 1 }}>
                                 {person.name}
                             </DSText>
                             {isOwner && (
@@ -131,7 +132,7 @@ export const SnakeCard = memo(({ person, onRefresh }: SnakeCardProps) => {
                                 color={upActive ? tokens.colors.accentForeground : tokens.colors.textMuted}
                             />
                             <DSText size="sm" weight="bold" color={upActive ? 'accentForeground' : 'textPrimary'}>
-                                {upvotes}
+                                {formatCompactNumber(upvotes)}
                             </DSText>
                         </TouchableOpacity>
                     </Animated.View>
@@ -150,7 +151,7 @@ export const SnakeCard = memo(({ person, onRefresh }: SnakeCardProps) => {
                                 color={downActive ? tokens.colors.accentForeground : tokens.colors.textMuted}
                             />
                             <DSText size="sm" weight="bold" color={downActive ? 'accentForeground' : 'textPrimary'}>
-                                {downvotes}
+                                {formatCompactNumber(downvotes)}
                             </DSText>
                         </TouchableOpacity>
                     </Animated.View>
