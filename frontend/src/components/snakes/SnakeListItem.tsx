@@ -9,6 +9,7 @@ import { CancelledPerson } from '@appTypes/index';
 import { useSnakeVote } from '@hooks/useSnakeVote';
 import { useFeedback } from '@contexts/FeedbackContext';
 import Animated, { FadeIn, useSharedValue, useAnimatedStyle, withSpring, withSequence } from 'react-native-reanimated';
+import { formatCompactNumber } from '@utils/formatters';
 
 interface SnakeListItemProps {
     person: CancelledPerson;
@@ -100,7 +101,7 @@ export const SnakeListItem = memo(function SnakeListItem({ person, rank, onRefre
                                 color={upActive ? tokens.colors.accentForeground : tokens.colors.textMuted}
                             />
                             <DSText size="sm" weight="bold" color={upActive ? 'accentForeground' : 'textPrimary'}>
-                                {upvotes}
+                                {formatCompactNumber(upvotes)}
                             </DSText>
                         </TouchableOpacity>
                     </Animated.View>
@@ -119,7 +120,7 @@ export const SnakeListItem = memo(function SnakeListItem({ person, rank, onRefre
                                 color={downActive ? tokens.colors.accentForeground : tokens.colors.textMuted}
                             />
                             <DSText size="sm" weight="bold" color={downActive ? 'accentForeground' : 'textPrimary'}>
-                                {downvotes}
+                                {formatCompactNumber(downvotes)}
                             </DSText>
                         </TouchableOpacity>
                     </Animated.View>

@@ -39,8 +39,11 @@ export function formatFullDate(dateString: string): string {
  * If the number is zero or negative, returns "0".
  */
 export function formatCompactNumber(num: number | string | undefined | null): string {
+    if (num === undefined || num === null) return '0';
+    if (typeof num === 'string' && /[KMB]$/i.test(num)) return num;
+
     const val = Number(num);
-    if (!val || isNaN(val) || val <= 0) return '0';
+    if (isNaN(val) || val <= 0) return '0';
 
     if (val >= 1000000000) {
         return (val / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
